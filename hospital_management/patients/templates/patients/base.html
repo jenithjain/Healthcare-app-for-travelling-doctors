@@ -1,0 +1,993 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMS - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: hsl(182, 100%, 35%);
+            --primary-light: hsl(182, 100%, 45%);
+            --secondary-color: hsl(186, 100%, 19%);
+            --white: hsl(0, 0%, 100%);
+            --light-bg: hsl(180, 100%, 97%);
+            --text-dark: hsl(222, 44%, 8%);
+            --text-light: hsl(0, 0%, 60%);
+            --shadow-1: 0px 2px 20px hsla(209, 36%, 72%, 0.2);
+            --shadow-2: 0 0 20px hsla(182, 100%, 35%, 0.1);
+            --radius-12: 12px;
+            --radius-4: 4px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rubik', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-dark);
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            margin-left: 280px; /* Changed from margin-right to margin-left */
+        }
+
+        /* Left Sidebar */
+        .sidebar {
+            background: linear-gradient(180deg, #2c3e50, #3498db);
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            height: 100vh;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            overflow-y: auto;
+        }
+
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .sidebar::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .sidebar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .logo h2 {
+            color: var(--primary-color);
+            font-size: 2rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-top: 2rem;
+        }
+
+        .nav-item {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item i {
+            color: white !important;
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item:hover, 
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(10px);
+        }
+
+        .nav-item:hover i, 
+        .nav-item.active i {
+            transform: scale(1.2);
+        }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: white;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item:hover::after,
+        .nav-item.active::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        /* Cards and Content */
+        .content-section {
+            background: var(--white);
+            border-radius: var(--radius-12);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-2);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        [data-reveal] {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: var(--transition);
+        }
+
+        [data-reveal].revealed {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 0; /* Changed from margin-right to margin-left */
+                padding: 1rem;
+            }
+
+            .sidebar {
+                transform: translateX(-100%); /* Changed from 100% to -100% */
+                transition: var(--transition);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .menu-toggle {
+                display: block;
+                position: fixed;
+                left: 1rem; /* Changed from right to left */
+                top: 1rem;
+                z-index: 1001;
+            }
+        }
+
+        /* Modern UI Enhancements */
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .gradient-text {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .card-hover-effect {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover-effect:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Enhanced Sidebar */
+        .sidebar {
+            background: linear-gradient(180deg, var(--secondary-color) 0%, var(--primary-color) 100%);
+        }
+
+        .nav-item {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--white);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item:hover::before {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        /* Enhanced Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary-color);
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        /* Notification Badge */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            animation: pulse 2s infinite;
+        }
+
+        .doctor-profile {
+            position: relative;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .doctor-image-container {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid white;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .doctor-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .doctor-info {
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .doctor-name {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.3s ease;
+        }
+
+        .doctor-designation {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.3s ease;
+            transition-delay: 0.5s;
+        }
+
+        /* Hover effects */
+        .doctor-profile:hover .doctor-image {
+            transform: scale(1.1);
+        }
+
+        .doctor-profile:hover .doctor-info {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .doctor-profile:hover .doctor-name {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .doctor-profile:hover .doctor-designation {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Add animation keyframes */
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Navigation menu styles */
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-top: 2rem;
+        }
+
+        .nav-item {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item i {
+            color: white !important;
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item:hover, 
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(10px);
+        }
+
+        .nav-item:hover i, 
+        .nav-item.active i {
+            transform: scale(1.2);
+        }
+
+        /* Contact Us special styling */
+        .nav-item[href*="contact"] {
+            margin-top: auto;
+            margin-bottom: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 1.5rem;
+        }
+
+        .nav-item[href*="contact"]:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        /* Hover effect line */
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: white;
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item:hover::after,
+        .nav-item.active::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        /* Medicine Panel Styles */
+        .medicine-panel {
+            position: fixed;
+            right: -400px;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: -5px 0 15px rgba(0, 119, 182, 0.1);
+            transition: right 0.3s ease;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .medicine-panel.active {
+            right: 0;
+        }
+
+        .medicine-header {
+            padding: 1.5rem;
+            background: #0077B6;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .medicine-grid {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .medicine-card {
+            border: 2px solid #0077B6;
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .medicine-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 119, 182, 0.2);
+        }
+
+        .medicine-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .medicine-name {
+            font-weight: 600;
+            color: #0077B6;
+            margin-bottom: 0.5rem;
+        }
+
+        .medicine-volume {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* Medicine Modal Styles */
+        .medicine-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1100;
+        }
+
+        .medicine-modal-content {
+            position: relative;
+            width: 90%;
+            max-width: 600px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        .order-btn {
+            background: #0077B6;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .order-btn:hover {
+            background: #005b8c;
+            transform: translateY(-2px);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .medicine-count {
+            background: #ff4757;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+
+        /* Update nav-item hover and active states */
+        .nav-item {
+            /* Existing styles remain */
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: var(--primary-light);
+            color: white;
+            transform: translateX(10px);
+        }
+
+        .nav-item i {
+            /* Existing styles remain */
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item:hover i,
+        .nav-item.active i {
+            transform: scale(1.2);
+        }
+
+        /* Add highlight effect for Contact Us */
+        .nav-item[href*="contact"] {
+            margin-top: auto;
+            margin-bottom: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+        }
+
+        .nav-item[href*="contact"]:hover {
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+        }
+
+        /* Main content adjustment */
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+
+        .info-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            background: white;
+            width: 80%;
+            max-width: 800px;
+            margin: 50px auto;
+            border-radius: 12px;
+            padding: 2rem;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-logo {
+            height: 60px;
+            margin-bottom: 1rem;
+        }
+
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .feature-grid,
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-item,
+        .service-item,
+        .contact-item {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 8px;
+            background: #f8f9fa;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-item:hover,
+        .service-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-item i,
+        .service-item i,
+        .contact-item i {
+            font-size: 2.5rem;
+            color: #00B4DB;
+            margin-bottom: 1rem;
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+    {% block styles %}{% endblock %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Move sidebar before main content -->
+        <aside class="sidebar">
+            <div class="doctor-profile">
+                <div class="doctor-image-container">
+                    <img src="https://img.freepik.com/free-vector/doctor-character-background_1270-84.jpg" 
+                         alt="Doctor" 
+                         class="doctor-image">
+                </div>
+                <div class="doctor-info">
+                    <span class="doctor-name">Dr. John</span>
+                    <span class="doctor-designation">Intern</span>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <a href="{% url 'patients:dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-home"></i>
+                    Dashboard
+                </a>
+                <a href="{% url 'patients:patient_list' %}" class="nav-item {% if request.resolver_match.url_name == 'patient_list' %}active{% endif %}">
+                    <i class="fas fa-users"></i>
+                    Patients
+                </a>
+                <a href="{% url 'patients:appointment_list' %}" class="nav-item {% if request.resolver_match.url_name == 'appointment_list' %}active{% endif %}">
+                    <i class="fas fa-calendar-check"></i>
+                    Appointments
+                </a>
+                <a href="{% url 'patients:medicines' %}" class="nav-item {% if request.resolver_match.url_name == 'medicines' %}active{% endif %}">
+                    <i class="fas fa-pills"></i>
+                    Medicines
+                </a>
+                <a href="{% url 'patients:report' %}" class="nav-item {% if request.resolver_match.url_name == 'report' %}active{% endif %}">
+                    <i class="fas fa-file-medical"></i>
+                    Report
+                </a>
+                <a href="{% url 'patients:contact' %}" class="nav-item {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">
+                    <i class="fas fa-envelope"></i>
+                    Contact Us
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script>
+        // Animation Script
+        const revealElements = document.querySelectorAll("[data-reveal]");
+
+        const scrollReveal = function() {
+            for (let i = 0; i < revealElements.length; i++) {
+                const elementIsInScreen = revealElements[i].getBoundingClientRect().top < window.innerHeight / 1.2;
+
+                if (elementIsInScreen) {
+                    revealElements[i].classList.add("revealed");
+                }
+            }
+        }
+
+        window.addEventListener("scroll", scrollReveal);
+        window.addEventListener("load", scrollReveal);
+
+        // Mobile Menu Toggle
+        const menuToggle = document.querySelector('.menu-toggle');
+        const sidebar = document.querySelector('.sidebar');
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+        }
+
+        // Enhanced Loading Animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.className = 'loading-overlay';
+            loadingOverlay.innerHTML = '<div class="loading-spinner"></div>';
+            document.body.appendChild(loadingOverlay);
+
+            setTimeout(() => {
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loadingOverlay.remove();
+                }, 300);
+            }, 500);
+        });
+
+        // Smooth Scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Enhanced Animation Observer
+        const animateOnScroll = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                    if (entry.target.hasAttribute('data-animation')) {
+                        entry.target.style.animationName = entry.target.dataset.animation;
+                    }
+                }
+            });
+        }, {
+            threshold: 0.1
+        });
+
+        document.querySelectorAll('[data-reveal], [data-animation]').forEach((el) => {
+            animateOnScroll.observe(el);
+        });
+
+        // Dynamic Theme Colors
+        function setThemeColor(hue) {
+            document.documentElement.style.setProperty('--primary-color', `hsl(${hue}, 100%, 35%)`);
+            document.documentElement.style.setProperty('--secondary-color', `hsl(${hue + 10}, 100%, 19%)`);
+        }
+
+        // Random theme color on load (optional)
+        // setThemeColor(Math.random() * 360);
+
+        // Add this to your existing scripts
+        const medicines = [
+            {
+                id: 1,
+                name: "Paracetamol",
+                image: "https://example.com/paracetamol.jpg",
+                volume: "500mg",
+                description: "Pain reliever and fever reducer",
+                price: "$5.99",
+                stock: 150,
+                usage: "Take 1-2 tablets every 4-6 hours",
+                sideEffects: "Nausea, stomach pain, loss of appetite"
+            },
+            // Add more medicines here...
+        ];
+
+        function toggleMedicinePanel() {
+            const panel = document.querySelector('.medicine-panel');
+            panel.classList.toggle('active');
+            
+            if(panel.classList.contains('active')) {
+                populateMedicines();
+            }
+        }
+
+        function populateMedicines() {
+            const grid = document.querySelector('.medicine-grid');
+            grid.innerHTML = '';
+            
+            medicines.forEach((medicine, index) => {
+                const card = document.createElement('div');
+                card.className = 'medicine-card';
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                card.innerHTML = `
+                    <img src="${medicine.image}" alt="${medicine.name}" class="medicine-image">
+                    <h4 class="medicine-name">${medicine.name}</h4>
+                    <p class="medicine-volume">${medicine.volume}</p>
+                `;
+                
+                card.onclick = () => showMedicineDetails(medicine);
+                grid.appendChild(card);
+            });
+        }
+
+        function showMedicineDetails(medicine) {
+            const modal = document.querySelector('.medicine-modal');
+            const content = modal.querySelector('.medicine-details');
+            
+            content.innerHTML = `
+                <img src="${medicine.image}" alt="${medicine.name}" class="medicine-image">
+                <h3>${medicine.name}</h3>
+                <p class="volume">Volume: ${medicine.volume}</p>
+                <p class="price">Price: ${medicine.price}</p>
+                <p class="stock">In Stock: ${medicine.stock} units</p>
+                <p class="description">${medicine.description}</p>
+                <div class="usage-info">
+                    <h4>Usage Instructions:</h4>
+                    <p>${medicine.usage}</p>
+                </div>
+                <div class="side-effects">
+                    <h4>Side Effects:</h4>
+                    <p>${medicine.sideEffects}</p>
+                </div>
+                <button class="order-btn" onclick="orderMedicine(${medicine.id})">
+                    Order Now
+                </button>
+            `;
+            
+            modal.style.display = 'block';
+        }
+
+        function orderMedicine(medicineId) {
+            // Add your order logic here
+            alert(`Medicine order placed for ID: ${medicineId}`);
+        }
+
+        // Close modal when clicking outside
+        document.querySelector('.medicine-modal').onclick = function(e) {
+            if(e.target === this) {
+                this.style.display = 'none';
+            }
+        };
+
+        document.querySelector('.close-modal').onclick = function() {
+            document.querySelector('.medicine-modal').style.display = 'none';
+        };
+
+        // Update the navigation click handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // What We Serve
+            document.querySelector('a[href*="make_appointment"]').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('whatWeServeModal').style.display = 'block';
+            });
+
+            // Who We Serve
+            document.querySelector('a[href*="patient_list"]').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('whoWeServeModal').style.display = 'block';
+            });
+
+            // Reach Us
+            document.querySelector('a[href*="appointment_list"]').addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('reachUsModal').style.display = 'block';
+            });
+
+            // Close modals
+            document.querySelectorAll('.close-modal, .info-modal').forEach(element => {
+                element.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        document.querySelectorAll('.info-modal').forEach(modal => {
+                            modal.style.display = 'none';
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
