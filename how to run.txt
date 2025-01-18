@@ -1,0 +1,9 @@
+first activate the virtual environment 
+venv/scripts/activate 
+
+cd hospital_management
+
+py manage.py runserver 
+
+
+install all the necessary libraries 
